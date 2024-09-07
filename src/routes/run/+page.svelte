@@ -1,4 +1,15 @@
 <script>
+    import { onMount } from "svelte";
+    import { browser } from "$app/environment";
+
+    /** @type {Object.<string,Array<Object>>} */
+    let draftingBoosters = {};
+
+    /** @type {Object.<string,string>} - UUID, ScryfallAPIID */
+    let uuidToScryfall = {};
+
+    /** @type {Object} */
+    let data;
     /**
      * Handles a click to another page
      * @param {string} route - Route to another local page
@@ -6,11 +17,65 @@
     function handlePageTransfer(route) {
         window.location.href = route;
     }
+
+    async function getMTJSON() {
+        let boosters = Object.entries(data);
+        if (boosters.length != 0) {
+            for (var b in boosters) {
+                let url =
+                    "https://mtgjson.com/api/v5/" + boosters[b][0] + ".json";
+                let f = await fetch(url);
+                let t_data = (await f.json()).data;
+                if (t_data.booster.play != undefined) {
+                    draftingBoosters[boosters[b][0]] = [
+                        ...t_data.booster.play.boosters,
+                    ];
+                } else if (t_data.booster.draft != undefined) {
+                    draftingBoosters[boosters[b][0]] = [
+                        ...t_data.booster.draft.boosters,
+                    ];
+                } else {
+                    draftingBoosters[boosters[b][0]] = [
+                        ...t_data.booster.default.boosters,
+                    ];
+                }
+                // TAKE CARDS
+                for (var x in t_data.cards) {
+                    var card = t_data.cards[x];
+                    uuidToScryfall[card.uuid] = card.identifiers.scryfallId;
+                }
+                console.log(uuidToScryfall);
+                t_data = undefined;
+            }
+        }
+    }
+
+    async function getCookies() {
+        if (browser === false) {
+            data = {};
+        } else {
+            /** @type {string | null} */
+            let temp = sessionStorage.getItem("boosters");
+            if (temp === null) {
+                temp = "{}";
+            }
+            data = JSON.parse(temp);
+        }
+    }
+
+    onMount(async function () {
+        await getCookies();
+        await getMTJSON();
+    });
+
+    function refresh() {
+        draftingBoosters = draftingBoosters;
+    }
 </script>
 
 <div id="underHeader"></div>
 <div id="headerDiv">
-    <h1>About</h1>
+    <h1>RUN</h1>
     <button
         class="headerButton"
         id="homeButton"
@@ -18,13 +83,18 @@
             handlePageTransfer("/");
         }}>Home</button
     >
+    <button
+        class="headerButton"
+        on:click={() => {
+            refresh();
+        }}>Refresh</button
+    >
 </div>
 
 <div>
-    <p>
-        Version 0.1 <br /><br />Just some booster pack generation and sorting
-        for sealed events with varying quantities and types of packs
-    </p>
+    {#each Object.entries(uuidToScryfall) as [code, booster]}
+        <p>{code} {booster}</p>
+    {/each}
 </div>
 
 <style>

@@ -1,8 +1,10 @@
 <script>
-    /** @type {Object.<string, number>} */
-    let selectedBoosters = {};
+    import { browser } from "$app/environment";
 
-    /** @type {} */
+    /** @type {Object.<string,number>} */
+    export let selectedBoosters = {};
+
+    /** @type {Array.<Object.<string,string>>} */
     let validBoosters = [
         {
             code: "OTJ",
@@ -28,19 +30,11 @@
     }
 
     /**
-     * Handles handing correct info to Svelte
-     */
-    function handleListInfo() {
-        console.log(Object.entries(selectedBoosters));
-    }
-
-    /**
      * Adds to booster list
      * @param {string | null} boosterCode - Booster pack set code
      * @param {number} amount - Default 1, amount to add
      */
     function addToBoosterList(boosterCode, amount = 1) {
-        handleListInfo();
         if (boosterCode === null) {
             return;
         }
@@ -54,6 +48,19 @@
             }
         }
         selectedBoosters = selectedBoosters;
+    }
+
+    function redirectToRun() {
+        if (Object.entries(selectedBoosters).length === 0) {
+            alert("No boosters selected");
+        } else {
+            browser &&
+                sessionStorage.setItem(
+                    "boosters",
+                    JSON.stringify(selectedBoosters),
+                );
+            handlePageTransfer("/run");
+        }
     }
 </script>
 
@@ -98,7 +105,7 @@
 </div>
 <div class="buffer" style:--div-width="100%" style:--div-height="20px"></div>
 <div class="centeredDiv">
-    <button class="button runButton" on:click={() => console.log("run")}
+    <button class="button runButton" on:click={() => redirectToRun()}
         >Run</button
     >
 </div>
@@ -138,6 +145,7 @@
         border-radius: 0px 0px 24px 24px;
         border: 5px solid #c8acd6;
         background: #2e236c;
+        z-index: 100;
     }
     #underHeader {
         position: relative;
@@ -293,5 +301,6 @@
         width: 20%;
         height: 200px;
         background-color: #00000020;
+        overflow: scroll;
     }
 </style>
