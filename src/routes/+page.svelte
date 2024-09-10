@@ -14,6 +14,10 @@
             code: "MKM",
             text: "Murders at Karlov Manor",
         },
+        {
+            code: "BLB",
+            text: "Bloomburrow",
+        },
     ];
     /** @type {Object.<string,string>} */
     let selected;

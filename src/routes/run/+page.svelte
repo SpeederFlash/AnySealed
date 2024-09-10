@@ -2,14 +2,24 @@
     import { onMount } from "svelte";
     import { browser } from "$app/environment";
 
-    /** @type {Object.<string,Array<Object>>} */
+    /** @type {Object.<string,Object>} */
     let draftingBoosters = {};
 
     /** @type {Object.<string,string>} - UUID, ScryfallAPIID */
     let uuidToScryfall = {};
 
+    /** @type {Object.<string,string>} Identity */
+    let uuidToColorIdentity = {};
+
     /** @type {Object} */
     let data;
+
+    /** @type {Array<string>} */
+    let cards = [];
+
+    /** @type {Object.<string,string>} */
+    let uuidToImage = {};
+
     /**
      * Handles a click to another page
      * @param {string} route - Route to another local page
@@ -18,33 +28,90 @@
         window.location.href = route;
     }
 
+    /**
+     * Generate a magic pack
+     * @param {string}code
+     */
+    async function generatePack(code) {
+        /** @type {any} - JSDOC don't wanna be nice. It has a Object, I just can't be bothered to get it to play nice */
+        var boosterPackSpecs = draftingBoosters[code];
+        // Choose booster by weight
+        var chosen =
+            Math.floor(Math.random() * boosterPackSpecs.boostersTotalWeight) +
+            1;
+        var currentPackI = 0;
+        for (let i = 0; i < boosterPackSpecs.boosters.length; i++) {
+            chosen -= boosterPackSpecs.boosters[i].weight;
+            if (chosen <= 0) {
+                currentPackI = i;
+                break;
+            }
+        }
+        var currentPack = boosterPackSpecs.boosters[currentPackI];
+        // Card by sheet by booster specs
+        let entries = Object.entries(currentPack.contents);
+        for (var i in entries) {
+            if (entries[i][0] === "theList") {
+                continue;
+            }
+            var sheet = boosterPackSpecs.sheets[entries[i][0]];
+
+            for (let times = 0; times < entries[i][1]; times++) {
+                var card_chosen =
+                    Math.floor(Math.random() * sheet.totalWeight) + 1;
+                var card_i = "";
+                for (var key in sheet.cards) {
+                    card_chosen -= sheet.cards[key];
+                    if (card_chosen <= 0) {
+                        card_i = key;
+                        break;
+                    }
+                }
+                cards.push(card_i);
+            }
+        }
+        cards = cards;
+    }
+
     async function getMTJSON() {
         let boosters = Object.entries(data);
+        // CHECKS FOR THE SPECIAL SLOTS
+        if (boosters.filter((e) => e[0] === "OTJ").length > 0) {
+            boosters.push(["OTP", 1]);
+        }
         if (boosters.length != 0) {
             for (var b in boosters) {
                 let url =
                     "https://mtgjson.com/api/v5/" + boosters[b][0] + ".json";
                 let f = await fetch(url);
                 let t_data = (await f.json()).data;
-                if (t_data.booster.play != undefined) {
-                    draftingBoosters[boosters[b][0]] = [
-                        ...t_data.booster.play.boosters,
-                    ];
-                } else if (t_data.booster.draft != undefined) {
-                    draftingBoosters[boosters[b][0]] = [
-                        ...t_data.booster.draft.boosters,
-                    ];
-                } else {
-                    draftingBoosters[boosters[b][0]] = [
-                        ...t_data.booster.default.boosters,
-                    ];
+                if (t_data.booster !== undefined) {
+                    if (t_data.booster.play != undefined) {
+                        draftingBoosters[boosters[b][0]] = t_data.booster.play;
+                    } else if (t_data.booster.draft != undefined) {
+                        draftingBoosters[boosters[b][0]] = t_data.booster.draft;
+                    } else {
+                        draftingBoosters[boosters[b][0]] =
+                            t_data.booster.default;
+                    }
                 }
                 // TAKE CARDS
                 for (var x in t_data.cards) {
                     var card = t_data.cards[x];
                     uuidToScryfall[card.uuid] = card.identifiers.scryfallId;
+                    if (uuidToColorIdentity[card.uuid] === undefined) {
+                        for (var e in card.colorIdentity) {
+                            if (uuidToColorIdentity[card.uuid] !== undefined) {
+                                uuidToColorIdentity[card.uuid] =
+                                    uuidToColorIdentity[card.uuid] +
+                                    card.colorIdentity[e];
+                            } else {
+                                uuidToColorIdentity[card.uuid] =
+                                    card.colorIdentity[e];
+                            }
+                        }
+                    }
                 }
-                console.log(uuidToScryfall);
                 t_data = undefined;
             }
         }
@@ -63,14 +130,61 @@
         }
     }
 
+    /**
+     * Sleep for time milliseconds
+     * @param {number} time
+     */
+    const sleep = (time) => new Promise((r) => setTimeout(r, time));
+
+    async function getImages() {
+        var cardsLeft = true;
+        var currIndex = 0;
+        while (cardsLeft) {
+            let sfCards = cards.slice(currIndex, currIndex + 75);
+            currIndex += 75;
+            if (currIndex > cards.length) {
+                cardsLeft = false;
+            }
+            /** @type {{identifiers: {id: string}[]}} */
+            let tempObject = {};
+            tempObject.identifiers = [];
+            for (let i = 0; i < 75; i++) {
+                tempObject.identifiers.push({ id: "" });
+            }
+            for (let i = 0; i < 75; i++) {
+                tempObject.identifiers[i].id = uuidToScryfall[sfCards[i]];
+            }
+            tempObject.identifiers = tempObject.identifiers.filter((elem) => {
+                return elem.id !== undefined;
+            });
+            let cardsReturned = await (
+                await fetch("https://api.scryfall.com/cards/collection", {
+                    method: "POST",
+                    body: JSON.stringify(tempObject),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+            ).json();
+            await sleep(100);
+            for (let img_i = 0; img_i < cardsReturned.data.length; img_i++) {
+                uuidToImage[sfCards[img_i]] =
+                    cardsReturned.data[img_i].image_uris.normal;
+            }
+        }
+    }
+
     onMount(async function () {
         await getCookies();
         await getMTJSON();
+        var entries = Object.entries(data);
+        for (var entry in entries) {
+            for (var i = 0; i < entries[entry][1]; i++) {
+                await generatePack(entries[entry][0]);
+            }
+        }
+        await getImages();
     });
-
-    function refresh() {
-        draftingBoosters = draftingBoosters;
-    }
 </script>
 
 <div id="underHeader"></div>
@@ -83,18 +197,62 @@
             handlePageTransfer("/");
         }}>Home</button
     >
-    <button
-        class="headerButton"
-        on:click={() => {
-            refresh();
-        }}>Refresh</button
-    >
 </div>
 
-<div>
-    {#each Object.entries(uuidToScryfall) as [code, booster]}
-        <p>{code} {booster}</p>
-    {/each}
+<div id="imageHolder">
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === "W";
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === "U";
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === "B";
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === "R";
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === "G";
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            return uuidToColorIdentity[e] === undefined;
+        }) as card}
+            <img src={uuidToImage[card]} alt="v" />
+        {/each}
+    </div>
+    <div class="identityDiv">
+        {#each cards.filter((e) => {
+            if (uuidToColorIdentity[e] !== undefined) {
+                return uuidToColorIdentity[e].length > 1;
+            } else {
+                return false;
+            }
+        }) as card}
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        {/each}
+    </div>
 </div>
 
 <style>
@@ -191,5 +349,18 @@
         padding: 15px;
         border: 5px solid #c8acd6;
         border-color: #c8acd6;
+    }
+
+    .identityDiv {
+        width: 10%;
+    }
+
+    #imageHolder {
+        display: flex;
+        flex-direction: row;
+    }
+
+    img {
+        width: 100%;
     }
 </style>

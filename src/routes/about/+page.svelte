@@ -22,7 +22,7 @@
 
 <div>
     <p>
-        Version 0.1 <br /><br />Just some booster pack generation and sorting
+        Version 0.4 <br /><br />Just some booster pack generation and sorting
         for sealed events with varying quantities and types of packs
     </p>
 </div>
