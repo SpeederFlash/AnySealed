@@ -4,7 +4,7 @@
      * @param {string} route - Route to another local page
      */
     function handlePageTransfer(route) {
-        window.location.href = "/AnySealed" + route;
+        window.location.href = route;
     }
 </script>
 

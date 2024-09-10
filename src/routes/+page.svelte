@@ -30,7 +30,7 @@
      * @param {string} route - Route to another local page
      */
     function handlePageTransfer(route) {
-        window.location.href = "/AnySealed" + route;
+        window.location.href = route;
     }
 
     /**
@@ -63,7 +63,7 @@
                     "boosters",
                     JSON.stringify(selectedBoosters),
                 );
-            handlePageTransfer("/run");
+            handlePageTransfer("./run");
         }
     }
 </script>
@@ -75,7 +75,7 @@
         class="headerButton button"
         id="aboutButton"
         on:click={() => {
-            handlePageTransfer("/about");
+            handlePageTransfer("./about");
         }}>About</button
     >
 </div>
