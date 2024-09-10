@@ -2,7 +2,11 @@
 
 on:
   push:
+<<<<<<< HEAD
     branches: 'main'
+=======
+    branches: "main"
+>>>>>>> a783f7b (Version 0.9)
 
 jobs:
   build_site:
@@ -28,7 +32,11 @@ jobs:
 
       - name: build
         env:
+<<<<<<< HEAD
           BASE_PATH: '/${{ github.event.repository.name }}'
+=======
+          BASE_PATH: "/${{ github.event.repository.name }}"
+>>>>>>> a783f7b (Version 0.9)
         run: |
           npm run build
 
@@ -36,7 +44,11 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # this should match the `pages` option in your adapter-static options
+<<<<<<< HEAD
           path: 'build/'
+=======
+          path: "build/"
+>>>>>>> a783f7b (Version 0.9)
 
   deploy:
     needs: build_site

@@ -204,42 +204,42 @@
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "W";
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "U";
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "B";
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "R";
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "G";
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === undefined;
         }) as card}
-            <img src={uuidToImage[card]} alt="v" />
+            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
         {/each}
     </div>
     <div class="identityDiv">
