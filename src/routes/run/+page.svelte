@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { browser } from "$app/environment";
+    import { fly } from "svelte/transition";
 
     /** @type {Object.<string,Object>} */
     let draftingBoosters = {};
@@ -78,6 +79,18 @@
         // CHECKS FOR THE SPECIAL SLOTS
         if (boosters.filter((e) => e[0] === "OTJ").length > 0) {
             boosters.push(["OTP", 1]);
+        }
+        if (boosters.filter((e) => e[0] === "WOE").length > 0) {
+            boosters.push(["WOT", 1]);
+        }
+        if (boosters.filter((e) => e[0] === "MOM").length > 0) {
+            boosters.push(["MUL", 1]);
+        }
+        if (boosters.filter((e) => e[0] === "STX").length > 0) {
+            boosters.push(["STA", 1]);
+        }
+        if (boosters.filter((e) => e[0] === "MH3").length > 0) {
+            boosters.push(["SPG", 1]);
         }
         if (boosters.length != 0) {
             for (var b in boosters) {
@@ -183,6 +196,7 @@
                 await generatePack(entries[entry][0]);
             }
         }
+        await sleep(1000);
         await getImages();
     });
 </script>
@@ -203,43 +217,103 @@
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "W";
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === "W";
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "U";
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === "U";
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "B";
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === "B";
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "R";
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === "R";
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === "G";
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === "G";
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
         {#each cards.filter((e) => {
             return uuidToColorIdentity[e] === undefined;
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    return uuidToColorIdentity[e] === undefined;
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="identityDiv">
@@ -249,8 +323,22 @@
             } else {
                 return false;
             }
-        }) as card}
-            <img src={uuidToImage[card]} alt={uuidToColorIdentity[card]} />
+        }) as card, i}
+            {#if i < cards.filter((e) => {
+                    if (uuidToColorIdentity[e] !== undefined) {
+                        return uuidToColorIdentity[e].length > 1;
+                    } else {
+                        return false;
+                    }
+                }).length - 1}
+                <div class="imageBoundingBox">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {:else}
+                <div class="">
+                    <img src={uuidToImage[card]} alt="" />
+                </div>
+            {/if}
         {/each}
     </div>
 </div>
@@ -362,5 +450,16 @@
 
     img {
         width: 100%;
+    }
+
+    .imageBoundingBox {
+        max-height: 2%;
+        overflow: hidden;
+        transition: max-height 500ms ease;
+    }
+
+    .imageBoundingBox:hover {
+        max-height: 20%;
+        transition: max-height 500ms ease;
     }
 </style>

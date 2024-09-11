@@ -22,8 +22,10 @@
 
 <div>
     <p>
-        Version 0.4 <br /><br />Just some booster pack generation and sorting
-        for sealed events with varying quantities and types of packs
+        Version 1.0 <br /><br />
+        Might add more boosters in the future<br /><br />Just some booster pack
+        generation and sorting for sealed events with varying quantities and
+        types of packs
     </p>
 </div>
 

@@ -15,6 +15,50 @@
             text: "Murders at Karlov Manor",
         },
         {
+            code: "LCI",
+            text: "Lost Caverns of Ixalan",
+        },
+        {
+            code: "WOE",
+            text: "Wilds of Eldraine",
+        },
+        {
+            code: "DMR",
+            text: "Dominaria Remastered",
+        },
+        {
+            code: "NEO",
+            text: "Kamigawa: Neon Dynasty",
+        },
+        {
+            code: "AFR",
+            text: "Adventures in the Forgotten Realms",
+        },
+        {
+            code: "MOM",
+            text: "March of the Machine",
+        },
+        {
+            code: "STX",
+            text: "Strixhaven: School of Mages",
+        },
+        {
+            code: "MH3",
+            text: "Modern Horizons 3",
+        },
+        {
+            code: "LTR",
+            text: "The Lord of the Rings: Tales of Middle-earth",
+        },
+        {
+            code: "CLB",
+            text: "Commander Legends: Battle for Baldur's Gate",
+        },
+        {
+            code: "RVR",
+            text: "Ravnica Remastered",
+        },
+        {
             code: "BLB",
             text: "Bloomburrow",
         },
@@ -30,7 +74,8 @@
      * @param {string} route - Route to another local page
      */
     function handlePageTransfer(route) {
-        window.location.href = "/AnySealed" + route;
+        //window.location.href = "/AnySealed" + route;
+        window.location.href = route;
     }
 
     /**
@@ -63,7 +108,7 @@
                     "boosters",
                     JSON.stringify(selectedBoosters),
                 );
-            handlePageTransfer("./run");
+            handlePageTransfer("/run");
         }
     }
 </script>
@@ -75,7 +120,7 @@
         class="headerButton button"
         id="aboutButton"
         on:click={() => {
-            handlePageTransfer("./about");
+            handlePageTransfer("/about");
         }}>About</button
     >
 </div>
